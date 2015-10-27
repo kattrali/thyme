@@ -1,0 +1,7 @@
+[package]
+name = "libthyme"
+version = "1.0.0"
+authors = ["Delisa Mason <iskanamagus@gmail.com>"]
+
+[dependencies]
+cards = "1.1.1"
