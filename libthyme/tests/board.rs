@@ -7,6 +7,7 @@ use cards::card::Card;
 #[test]
 fn has_all_cards_minus_one() {
     let board = Board::new();
+    assert_eq!(51, board.count_all_cards());
     let mut count = 0;
     for stack in &board.stacks {
         count += stack.cards.len();
@@ -108,8 +109,9 @@ fn empty_stack(board: &mut Board, x: HPosition, y: VPosition) -> Vec<Card> {
     return stack;
 }
 
-fn check_count(x: HPosition, y: VPosition, count: i32) {
+fn check_count(x: HPosition, y: VPosition, count: usize) {
     let mut board = Board::new();
+    assert_eq!(board.count_cards(Position { x: x, y: y }), count);
     for _ in (0..count) {
         assert!(board.pop(&vec![Position { x: x, y: y }]).is_ok());
     }

@@ -64,6 +64,20 @@ impl Board {
         return combination(&self.positions_remaining())
     }
 
+    /// Count the remaining cards in a stack
+    pub fn count_cards(&self, position: Position) -> usize {
+        let stack = self.stacks.iter().filter(|s| s.position == position).last();
+        if stack.is_some() {
+            return stack.unwrap().cards.len()
+        }
+        return 0;
+    }
+
+    /// Count the remaining cards on the board
+    pub fn count_all_cards(&self) -> usize {
+        return self.stacks.iter().fold(0, |acc, s| acc + s.cards.len());
+    }
+
     /// View the cards on top of the stack at a selection of positions, or a
     /// BoardError if the request could not be fulfilled for all positions
     pub fn peek(&mut self, positions: &Vec<Position>) -> Result<Vec<cards::card::Card>, BoardError> {
