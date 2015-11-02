@@ -37,6 +37,7 @@ pub fn redraw(ui: &UI, game: &mut Game, refresh: bool) {
         ncurses::clear();
     }
     if validate_screen_size() {
+        write_title(game);
         draw_cards(ui, game);
         write_message(&ui.message);
     }
@@ -81,6 +82,16 @@ fn validate_screen_size() -> bool {
         return false
     }
     return true
+}
+
+/// Print the game title and status info
+fn write_title(game: &Game) {
+    ncurses::attron(ncurses::A_BOLD());
+    ncurses::mvprintw(0, 0, "Thyme");
+    ncurses::attroff(ncurses::A_BOLD());
+    let (_, suit) = layout_suit(game.board.lucky_card);
+    ncurses::printw(&format!(" - Lucky Suit: {}", suit));
+    ncurses::clrtoeol();
 }
 
 /// Print the message at the bottom of the window
