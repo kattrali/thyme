@@ -100,10 +100,10 @@ fn empty_stack(board: &mut Board, x: HPosition, y: VPosition) -> Vec<Card> {
     let mut stack = Vec::<Card>::new();
     loop {
         let result = board.pop(&vec![Position { x: x, y: y }]);
-        if result.is_err() {
+        if result.is_none() {
             break;
         } else {
-            stack.push(result.ok().unwrap()[0])
+            stack.push(result.unwrap()[0])
         }
     }
     return stack;
@@ -113,7 +113,7 @@ fn check_count(x: HPosition, y: VPosition, count: usize) {
     let mut board = Board::new();
     assert_eq!(board.count_cards(Position { x: x, y: y }), count);
     for _ in (0..count) {
-        assert!(board.pop(&vec![Position { x: x, y: y }]).is_ok());
+        assert!(board.pop(&vec![Position { x: x, y: y }]).is_some());
     }
-    assert!(board.pop(&vec![Position { x: x, y: y }]).is_err());
+    assert!(board.pop(&vec![Position { x: x, y: y }]).is_none());
 }

@@ -14,10 +14,6 @@ pub enum HPosition {
     Right,
 }
 
-pub enum BoardError {
-    NoCardInStack
-}
-
 #[derive(PartialEq, Clone, Copy)]
 pub struct Position {
     /// horizontal position on the board
@@ -78,46 +74,38 @@ impl Board {
         return self.stacks.iter().fold(0, |acc, s| acc + s.cards.len());
     }
 
-    /// View the cards on top of the stack at a selection of positions, or a
-    /// BoardError if the request could not be fulfilled for all positions
-    pub fn peek(&mut self, positions: &Vec<Position>) -> Result<Vec<cards::card::Card>, BoardError> {
+    /// View the cards on top of the stack at a selection of positions, or None
+    /// if the request could not be fulfilled for all positions
+    pub fn peek(&mut self, positions: &Vec<Position>) -> Option<Vec<cards::card::Card>> {
         return self.take_last(positions, false)
     }
 
     /// View the top card of any stack
     pub fn top(&mut self, position: Position) -> Option<cards::card::Card> {
         let result = self.take_last(&vec![position], false);
-        if result.is_ok() {
-            return Some(result.ok().unwrap()[0])
-        }
-        return None;
+        return if result.is_some() { Some(result.unwrap()[0]) } else { None }
     }
 
     /// View and remove the cards on the of the stacks at a selection of
-    /// positions, or a BoardError if the request could not be fulfilled for
+    /// positions, or None if the request could not be fulfilled for
     /// all positions
-    pub fn pop(&mut self, positions: &Vec<Position>) -> Result<Vec<cards::card::Card>, BoardError> {
+    pub fn pop(&mut self, positions: &Vec<Position>) -> Option<Vec<cards::card::Card>> {
         return self.take_last(positions, true)
     }
 
-    fn take_last(&mut self, positions: &Vec<Position>, remove_matches: bool) -> Result<Vec<cards::card::Card>, BoardError> {
-        let mut selection = Vec::new();
-        for index in 0..self.stacks.len() {
-            let ref mut stack = self.stacks[index];
-            if positions.contains(&stack.position) {
-                if stack.cards.len() > 0 {
-                    let card = if remove_matches {
-                        stack.cards.pop().unwrap()
-                    } else {
-                        stack.cards[stack.cards.len() - 1]
-                    };
-                    selection.push(card)
-                } else {
-                    return Err(BoardError::NoCardInStack)
-                }
+    fn take_last(&mut self, positions: &Vec<Position>, remove_matches: bool) -> Option<Vec<cards::card::Card>> {
+        let remaining = self.positions_remaining();
+        for position in positions {
+            if !remaining.contains(position) {
+                return None
             }
         }
-        return Ok(selection)
+        let stacks = self.stacks.iter_mut().filter(|s| positions.contains(&s.position));
+        return Some(stacks.map(|s| if remove_matches {
+            s.cards.pop().unwrap()
+        } else {
+            *s.cards.last().unwrap()
+        }).collect())
     }
 }
 

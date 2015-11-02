@@ -19,6 +19,7 @@ const SELECTED_COLOR: i16 = 5; // yellow on black
 const CURSOR_INFO_COLOR: i16 = 6; // cyan on black
 const GAME_INFO_COLOR: i16 = 7; // green on black
 const BG_COLOR: i16 = ncurses::COLOR_BLACK;
+const CARD_BG_COLOR: i16 = ncurses::COLOR_WHITE;
 
 /// Set up the UI
 pub fn initialize_screen() {
@@ -28,8 +29,8 @@ pub fn initialize_screen() {
     ncurses::start_color();
     ncurses::keypad(ncurses::stdscr, true);
     ncurses::curs_set(ncurses::CURSOR_VISIBILITY::CURSOR_INVISIBLE);
-    ncurses::init_pair(CARD_COLOR_BLACK, ncurses::COLOR_BLACK, ncurses::COLOR_WHITE);
-    ncurses::init_pair(CARD_COLOR_RED, ncurses::COLOR_RED, ncurses::COLOR_WHITE);
+    ncurses::init_pair(CARD_COLOR_BLACK, ncurses::COLOR_BLACK, CARD_BG_COLOR);
+    ncurses::init_pair(CARD_COLOR_RED, ncurses::COLOR_RED, CARD_BG_COLOR);
     ncurses::init_pair(CARD_COLOR_EMPTY, ncurses::COLOR_WHITE, BG_COLOR);
     ncurses::init_pair(SELECTED_COLOR, ncurses::COLOR_YELLOW, BG_COLOR);
     ncurses::init_pair(CURSOR_INFO_COLOR, ncurses::COLOR_CYAN, BG_COLOR);
@@ -85,7 +86,9 @@ pub fn get_action() -> Action {
 fn validate_screen_size() -> bool {
     let min_height = BOARD_MARGIN*2 + CARD_MARGIN*4 + STATUS_HEIGHT + CARD_HEIGHT*3;
     if ncurses::LINES < min_height || ncurses::COLS < 50 {
-        write_message(&format!("Please resize your terminal to be at least 50x{}", min_height));
+        write_message(&format!(
+                "Please resize your terminal to be at least 50x{}",
+                min_height));
         return false
     }
     return true
@@ -266,15 +269,15 @@ fn card_location(position: Position) -> (i32, i32) {
     let top = BOARD_MARGIN + CARD_MARGIN;
     let middle = BOARD_MARGIN + CARD_MARGIN*2 + CARD_HEIGHT;
     let bottom = BOARD_MARGIN + CARD_MARGIN*3 + CARD_HEIGHT*2;
-    match position {
-        Position { x: HPosition::Left, y: VPosition::Top } => (left, top),
-        Position { x: HPosition::Left, y: VPosition::Middle } => (left, middle),
-        Position { x: HPosition::Left, y: VPosition::Bottom } => (left, bottom),
-        Position { x: HPosition::Center, y: VPosition::Top } => (center, top),
-        Position { x: HPosition::Center, y: VPosition::Middle } => (center, middle),
-        Position { x: HPosition::Center, y: VPosition::Bottom } => (center, bottom),
-        Position { x: HPosition::Right, y: VPosition::Top } => (right, top),
-        Position { x: HPosition::Right, y: VPosition::Middle } => (right, middle),
-        Position { x: HPosition::Right, y: VPosition::Bottom } => (right, bottom),
+    match (position.x, position.y) {
+        (HPosition::Left, VPosition::Top) => (left, top),
+        (HPosition::Left, VPosition::Middle) => (left, middle),
+        (HPosition::Left, VPosition::Bottom) => (left, bottom),
+        (HPosition::Center, VPosition::Top) => (center, top),
+        (HPosition::Center, VPosition::Middle) => (center, middle),
+        (HPosition::Center, VPosition::Bottom) => (center, bottom),
+        (HPosition::Right, VPosition::Top) => (right, top),
+        (HPosition::Right, VPosition::Middle) => (right, middle),
+        (HPosition::Right, VPosition::Bottom) => (right, bottom),
     }
 }
