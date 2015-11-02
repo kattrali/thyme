@@ -9,13 +9,16 @@ use libthyme::game::Game;
 const CARD_WIDTH: i32 = 7;
 const CARD_HEIGHT: i32 = 5;
 const CARD_MARGIN: i32 = 2;
-const BOARD_MARGIN: i32 = 1;
-const STATUS_HEIGHT: i32 = 1;
+const BOARD_MARGIN: i32 = 2;
+const STATUS_HEIGHT: i32 = 2;
 
 const CARD_COLOR_BLACK: i16 = 1; // black on white
 const CARD_COLOR_RED: i16 = 2; // red on white
 const CARD_COLOR_EMPTY: i16 = 4; // white on black
-const COLOR_SELECTED: i16 = 5; // yellow on black
+const SELECTED_COLOR: i16 = 5; // yellow on black
+const CURSOR_INFO_COLOR: i16 = 6; // cyan on black
+const GAME_INFO_COLOR: i16 = 7; // green on black
+const BG_COLOR: i16 = ncurses::COLOR_BLACK;
 
 /// Set up the UI
 pub fn initialize_screen() {
@@ -27,18 +30,22 @@ pub fn initialize_screen() {
     ncurses::curs_set(ncurses::CURSOR_VISIBILITY::CURSOR_INVISIBLE);
     ncurses::init_pair(CARD_COLOR_BLACK, ncurses::COLOR_BLACK, ncurses::COLOR_WHITE);
     ncurses::init_pair(CARD_COLOR_RED, ncurses::COLOR_RED, ncurses::COLOR_WHITE);
-    ncurses::init_pair(CARD_COLOR_EMPTY, ncurses::COLOR_WHITE, ncurses::COLOR_BLACK);
-    ncurses::init_pair(COLOR_SELECTED, ncurses::COLOR_YELLOW, ncurses::COLOR_BLACK);
+    ncurses::init_pair(CARD_COLOR_EMPTY, ncurses::COLOR_WHITE, BG_COLOR);
+    ncurses::init_pair(SELECTED_COLOR, ncurses::COLOR_YELLOW, BG_COLOR);
+    ncurses::init_pair(CURSOR_INFO_COLOR, ncurses::COLOR_CYAN, BG_COLOR);
+    ncurses::init_pair(GAME_INFO_COLOR, ncurses::COLOR_GREEN, BG_COLOR);
 }
 
 /// Redraw a UI in the current screen
 pub fn redraw(ui: &UI, game: &mut Game, refresh: bool) {
     if refresh {
         ncurses::clear();
+        ncurses::bkgd(ncurses::COLOR_PAIR(CARD_COLOR_EMPTY));
     }
     if validate_screen_size() {
         write_title(game);
         draw_cards(ui, game);
+        write_cursor_message(ui, game);
         write_message(&ui.message);
     }
     ncurses::refresh();
@@ -76,7 +83,7 @@ pub fn get_action() -> Action {
 
 /// Check that the content can fit
 fn validate_screen_size() -> bool {
-    let min_height = BOARD_MARGIN*2 + CARD_MARGIN*6 + STATUS_HEIGHT + CARD_HEIGHT*3;
+    let min_height = BOARD_MARGIN*2 + CARD_MARGIN*4 + STATUS_HEIGHT + CARD_HEIGHT*3;
     if ncurses::LINES < min_height || ncurses::COLS < 50 {
         write_message(&format!("Please resize your terminal to be at least 50x{}", min_height));
         return false
@@ -86,18 +93,42 @@ fn validate_screen_size() -> bool {
 
 /// Print the game title and status info
 fn write_title(game: &Game) {
+    printw_margin(0, 0);
     ncurses::attron(ncurses::A_BOLD());
-    ncurses::mvprintw(0, 0, "Thyme");
+    ncurses::printw("Thyme");
     ncurses::attroff(ncurses::A_BOLD());
+    printw_margin(0, 1);
     let (_, suit) = layout_suit(game.board.lucky_card);
-    ncurses::printw(&format!(" - Lucky Suit: {}", suit));
+    let info = ncurses::COLOR_PAIR(GAME_INFO_COLOR);
+    ncurses::attron(info);
+    ncurses::printw(&format!("Lucky Suit: {}  Discards Left: {}/{}", suit,
+                             game.discards_allowed, game.discards_allowed_max));
     ncurses::clrtoeol();
+    ncurses::attroff(info);
 }
 
 /// Print the message at the bottom of the window
 fn write_message(message: &str) {
-    ncurses::mvprintw(ncurses::LINES - 1, 0, message);
+    printw_margin(0, ncurses::LINES - 1);
+    ncurses::printw(message);
     ncurses::clrtoeol();
+}
+
+fn write_cursor_message(ui: &UI, game: &Game) {
+    let stacked_cards = game.board.count_cards(ui.cursor_position);
+    let all_cards = game.board.count_all_cards();
+    let message = format!("*{}/{} cards in the stack", stacked_cards, all_cards);
+    let color = ncurses::COLOR_PAIR(CURSOR_INFO_COLOR);
+    printw_margin(0, ncurses::LINES - 2);
+    ncurses::attron(color);
+    ncurses::printw(&message);
+    ncurses::clrtoeol();
+    ncurses::attroff(color);
+}
+
+fn printw_margin(x: i32, y: i32) {
+    ncurses::mv(y, x);
+    printw_repeat(" ", BOARD_MARGIN, ncurses::COLOR_PAIR(CARD_COLOR_EMPTY));
 }
 
 fn draw_cards(ui: &UI, game: &mut Game) {
@@ -179,7 +210,7 @@ fn printw_repeat(content: &str, len: i32, color: u64) {
 }
 
 fn toggle_highlight_card(x: i32, y: i32, on: bool) {
-    let color = ncurses::COLOR_PAIR(COLOR_SELECTED);
+    let color = ncurses::COLOR_PAIR(SELECTED_COLOR);
     ncurses::attron(color);
     ncurses::mvprintw(y - 1, x - 1, if on {"┌"} else {" "});
     ncurses::attroff(color);
@@ -230,11 +261,11 @@ fn layout_value(card: cards::card::Card) -> String {
 /// Location (x, y) for a card position
 fn card_location(position: Position) -> (i32, i32) {
     let left = BOARD_MARGIN + CARD_MARGIN;
-    let center = BOARD_MARGIN + CARD_MARGIN*3 + CARD_WIDTH;
-    let right = BOARD_MARGIN + CARD_MARGIN*5 + CARD_WIDTH*2;
+    let center = BOARD_MARGIN + CARD_MARGIN*2 + CARD_WIDTH;
+    let right = BOARD_MARGIN + CARD_MARGIN*3 + CARD_WIDTH*2;
     let top = BOARD_MARGIN + CARD_MARGIN;
-    let middle = BOARD_MARGIN + CARD_MARGIN*3 + CARD_HEIGHT;
-    let bottom = BOARD_MARGIN + CARD_MARGIN*5 + CARD_HEIGHT*2;
+    let middle = BOARD_MARGIN + CARD_MARGIN*2 + CARD_HEIGHT;
+    let bottom = BOARD_MARGIN + CARD_MARGIN*3 + CARD_HEIGHT*2;
     match position {
         Position { x: HPosition::Left, y: VPosition::Top } => (left, top),
         Position { x: HPosition::Left, y: VPosition::Middle } => (left, middle),
