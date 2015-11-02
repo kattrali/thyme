@@ -12,7 +12,7 @@ pub fn main() {
     let mut game = &mut Game::new();
     let mut hand = None;
     initialize_screen();
-    redraw(ui, game, false);
+    redraw(ui, game, true);
     loop {
         let mut refresh = false;
         let action = get_action();
