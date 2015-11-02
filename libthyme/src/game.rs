@@ -72,12 +72,8 @@ impl Game {
 
     /// True if any more moves can be played
     pub fn moves_remaining(&mut self) -> bool {
-        for combination in self.board.hands_remaining() {
-            if self.check(&combination).is_ok() {
-                return true
-            }
-        }
-        return self.discards_allowed > 0
+        return self.board.hands_remaining().iter().find(|h| self.check(&h).is_ok()).is_some()
+        || self.discards_allowed > 0
     }
 
     /// Play the cards at the top of a set of stacks, updating score and
@@ -106,8 +102,8 @@ impl Game {
         let result = self.board.peek(positions);
         if rows.len() < 2 && positions.len() > 1 {
             return Err(MoveError::NeedMultipleRows);
-        } else if result.is_ok() {
-            return self.check_cards(&mut result.ok().unwrap())
+        } else if result.is_some() {
+            return self.check_cards(&mut result.unwrap())
         }
         return Err(MoveError::InvalidMove)
     }
