@@ -2,6 +2,8 @@
 
 A command-line interface implementation of [Sage Solitaire](http://sagesolitaire.com).
 
+![screenshot](thyme.png)
+
 # Installation
 
 ## Dependencies
