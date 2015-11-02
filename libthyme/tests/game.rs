@@ -13,7 +13,7 @@ fn check_straight_flush() {
         Card { value: Value::Six, suit: Suit::Clubs },
         Card { value: Value::Eight, suit: Suit::Clubs },
         Card { value: Value::Seven, suit: Suit::Clubs }], 0);
-    assert_eq!(check.ok().unwrap().hand, MoveType::StraightFlush);
+    assert_eq!(check.ok().unwrap(), MoveType::StraightFlush);
 }
 
 #[test]
@@ -23,7 +23,7 @@ fn check_four_of_a_kind() {
         Card { value: Value::Five, suit: Suit::Hearts },
         Card { value: Value::Five, suit: Suit::Spades },
         Card { value: Value::Five, suit: Suit::Diamonds }], 0);
-    assert_eq!(check.ok().unwrap().hand, MoveType::FourOfAKind);
+    assert_eq!(check.ok().unwrap(), MoveType::FourOfAKind);
 }
 
 #[test]
@@ -34,7 +34,7 @@ fn check_full_house() {
         Card { value: Value::Five, suit: Suit::Clubs },
         Card { value: Value::Eight, suit: Suit::Diamonds },
         Card { value: Value::Eight, suit: Suit::Clubs }], 0);
-    assert_eq!(check.ok().unwrap().hand, MoveType::FullHouse);
+    assert_eq!(check.ok().unwrap(), MoveType::FullHouse);
 }
 
 #[test]
@@ -45,7 +45,7 @@ fn check_flush() {
         Card { value: Value::Ace, suit: Suit::Diamonds },
         Card { value: Value::Eight, suit: Suit::Diamonds },
         Card { value: Value::Jack, suit: Suit::Diamonds }], 0);
-    assert_eq!(check.ok().unwrap().hand, MoveType::Flush);
+    assert_eq!(check.ok().unwrap(), MoveType::Flush);
 }
 
 #[test]
@@ -56,7 +56,7 @@ fn check_five_card_straight() {
         Card { value: Value::Eight, suit: Suit::Clubs },
         Card { value: Value::Nine, suit: Suit::Diamonds },
         Card { value: Value::Ten, suit: Suit::Diamonds }], 0);
-    assert_eq!(check.ok().unwrap().hand, MoveType::FiveCardStraight);
+    assert_eq!(check.ok().unwrap(), MoveType::FiveCardStraight);
 }
 
 #[test]
@@ -65,7 +65,7 @@ fn check_three_of_a_kind() {
         Card { value: Value::Five, suit: Suit::Hearts },
         Card { value: Value::Five, suit: Suit::Diamonds },
         Card { value: Value::Five, suit: Suit::Clubs }], 0);
-    assert_eq!(check.ok().unwrap().hand, MoveType::ThreeOfAKind);
+    assert_eq!(check.ok().unwrap(), MoveType::ThreeOfAKind);
 }
 
 #[test]
@@ -74,7 +74,7 @@ fn check_three_card_straight() {
         Card { value: Value::Five, suit: Suit::Hearts },
         Card { value: Value::Four, suit: Suit::Diamonds },
         Card { value: Value::Six, suit: Suit::Clubs }], 0);
-    assert_eq!(check.ok().unwrap().hand, MoveType::ThreeCardStraight);
+    assert_eq!(check.ok().unwrap(), MoveType::ThreeCardStraight);
 }
 
 #[test]
@@ -82,21 +82,21 @@ fn check_pair() {
     let check = check_game(vec![
         Card { value: Value::Six, suit: Suit::Hearts },
         Card { value: Value::Six, suit: Suit::Clubs }], 0);
-    assert_eq!(check.ok().unwrap().hand, MoveType::Pair);
+    assert_eq!(check.ok().unwrap(), MoveType::Pair);
 }
 
 #[test]
 fn check_trash() {
     let check = check_game(vec![
         Card { value: Value::Six, suit: Suit::Clubs }], 1);
-    assert_eq!(check.ok().unwrap().hand, MoveType::Trash);
+    assert_eq!(check.ok().unwrap(), MoveType::Trash);
 }
 
 #[test]
 fn check_no_trash() {
     let check = check_game(vec![
         Card { value: Value::Six, suit: Suit::Clubs }], 0);
-    assert_eq!(check.err().unwrap(), MoveError::InvalidMove);
+    assert_eq!(check.err().unwrap(), MoveError::NoDiscardsRemain);
 }
 
 #[test]
@@ -136,7 +136,7 @@ fn check_moves(cards: Vec<Card>, discards: i32) -> bool {
     return setup_game(cards, &positions, discards).moves_remaining()
 }
 
-fn check_game(cards: Vec<Card>, discards: i32) -> Result<Move, MoveError> {
+fn check_game(cards: Vec<Card>, discards: i32) -> Result<MoveType, MoveError> {
     let mut positions = vec![
         Position { x: HPosition::Left, y: VPosition::Top },
         Position { x: HPosition::Center, y: VPosition::Middle },

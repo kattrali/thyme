@@ -20,6 +20,12 @@ pub enum MoveError {
     NeedMultipleRows,
     /// The board is empty
     NoMovesRemain,
+    /// No discards remain
+    NoDiscardsRemain,
+    /// Two pair is not a sage
+    TwoPairIsInvalid,
+    /// The move cannot be played given the current hand
+    InvalidHand,
 }
 
 #[derive(PartialEq, Clone, Copy, Debug)]
@@ -44,13 +50,13 @@ pub enum MoveType {
     Trash,
 }
 
-#[derive(PartialEq, Clone, Copy, Debug)]
-pub struct Move {
-    pub hand: MoveType,
+pub struct Score {
     /// The increase in score attained by playing this hand
-    pub score: i32,
+    pub value: i32,
     /// A score bonus from playing this hand, such as from clearing a stack
     pub bonus: i32,
+    /// Score multiplier from playing a lucky hand
+    pub multiplier: i32,
 }
 
 impl Game {
@@ -76,17 +82,26 @@ impl Game {
 
     /// Play the cards at the top of a set of stacks, updating score and
     /// discards_allowed if applicable
-    pub fn play(&mut self, hand: MoveType, positions: &Vec<Position>) -> Result<Move, MoveError> {
+    pub fn play(&mut self, hand: MoveType, positions: &Vec<Position>) -> Result<MoveType, MoveError> {
         let check = self.check(positions);
-        if check.is_ok() && check.ok().unwrap().hand == hand {
-            let _ = self.board.pop(&positions);
+        if check.is_ok() {
+            if check.ok().unwrap() == hand {
+                let _ = self.board.pop(&positions);
+                if hand == MoveType::Trash {
+                    self.discards_allowed -= 1;
+                } else if self.discards_allowed < self.discards_allowed_max {
+                    self.discards_allowed += 1;
+                }
+            } else {
+                return Err(MoveError::InvalidHand);
+            }
         }
         return check;
     }
 
     /// Determine what move would result from playing the cards on top of a
     /// set of stacks
-    pub fn check(&mut self, positions: &Vec<Position>) -> Result<Move, MoveError> {
+    pub fn check(&mut self, positions: &Vec<Position>) -> Result<MoveType, MoveError> {
         let rows = uniq(positions.iter().map(|p| p.y).collect());
         let result = self.board.peek(positions);
         if rows.len() < 2 && positions.len() > 1 {
@@ -97,7 +112,7 @@ impl Game {
         return Err(MoveError::InvalidMove)
     }
 
-    fn check_cards(&self, cards: &mut Vec<cards::card::Card>) -> Result<Move, MoveError> {
+    fn check_cards(&self, cards: &mut Vec<cards::card::Card>) -> Result<MoveType, MoveError> {
         match cards.len() {
             5 => return check_five(cards),
             4 => return check_four(cards),
@@ -119,45 +134,45 @@ fn uniq<T>(items: Vec<T>) -> Vec<T> where T: PartialEq {
     return result;
 }
 
-fn check_five(cards: &mut Vec<cards::card::Card>) -> Result<Move, MoveError> {
+fn check_five(cards: &mut Vec<cards::card::Card>) -> Result<MoveType, MoveError> {
     if is_consecutive(cards) && is_same_suit(cards) {
-        return Ok(Move { hand: MoveType::StraightFlush, score: 0, bonus: 0 })
+        return Ok(MoveType::StraightFlush)
     } else if is_consecutive(cards) {
-        return Ok(Move { hand: MoveType::FiveCardStraight, score: 0, bonus: 0 })
+        return Ok(MoveType::FiveCardStraight)
     } else if is_same_suit(cards) {
-        return Ok(Move { hand: MoveType::Flush, score: 0, bonus: 0 })
+        return Ok(MoveType::Flush)
     } else if contains_multiple_of_value(cards, 3) && contains_multiple_of_value(cards, 2) {
-        return Ok(Move { hand: MoveType::FullHouse, score: 0, bonus: 0 })
+        return Ok(MoveType::FullHouse)
     }
     return Err(MoveError::InvalidMove);
 }
 
-fn check_four(cards: &mut Vec<cards::card::Card>) -> Result<Move, MoveError> {
+fn check_four(cards: &mut Vec<cards::card::Card>) -> Result<MoveType, MoveError> {
     if contains_multiple_of_value(cards, 4) {
-        return Ok(Move { hand: MoveType::FourOfAKind, score: 0, bonus: 0 })
+        return Ok(MoveType::FourOfAKind)
     }
     return Err(MoveError::InvalidMove);
 }
 
-fn check_three(cards: &mut Vec<cards::card::Card>) -> Result<Move, MoveError> {
+fn check_three(cards: &mut Vec<cards::card::Card>) -> Result<MoveType, MoveError> {
     if is_consecutive(cards) {
-        return Ok(Move { hand: MoveType::ThreeCardStraight, score: 0, bonus: 0 })
+        return Ok(MoveType::ThreeCardStraight)
     } else if contains_multiple_of_value(cards, 3) {
-        return Ok(Move { hand: MoveType::ThreeOfAKind, score: 0, bonus: 0 })
+        return Ok(MoveType::ThreeOfAKind)
     }
     return Err(MoveError::InvalidMove);
 }
 
-fn check_two(cards: &mut Vec<cards::card::Card>) -> Result<Move, MoveError> {
+fn check_two(cards: &mut Vec<cards::card::Card>) -> Result<MoveType, MoveError> {
     if contains_multiple_of_value(cards, 2) {
-        return Ok(Move { hand: MoveType::Pair, score: 0, bonus: 0 })
+        return Ok(MoveType::Pair)
     }
     return Err(MoveError::InvalidMove);
 }
 
-fn check_one(trashes_remaining: i32) -> Result<Move, MoveError> {
+fn check_one(trashes_remaining: i32) -> Result<MoveType, MoveError> {
     if trashes_remaining > 0 {
-        return Ok(Move { hand: MoveType::Trash, score: 0, bonus: 0 })
+        return Ok(MoveType::Trash)
     }
-    return Err(MoveError::InvalidMove);
+    return Err(MoveError::NoDiscardsRemain);
 }

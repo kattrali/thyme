@@ -39,7 +39,13 @@ fn play_hand(hand: Option<MoveType>, game: &mut Game, ui: &mut UI) {
         let result = game.play(hand.unwrap(), &ui.selection);
         if result.is_ok() {
             ui.selection.clear();
-            ui.message = "".to_string();
+            if game.moves_remaining() {
+                ui.message = play_message(hand.unwrap())
+            } else if game.board.positions_remaining().len() > 0 {
+                ui.message = error_message(MoveError::NoMovesRemain)
+            } else {
+                ui.message = success_message();
+            }
         } else {
             ui.message = error_message(result.err().unwrap())
         }
@@ -47,22 +53,65 @@ fn play_hand(hand: Option<MoveType>, game: &mut Game, ui: &mut UI) {
 }
 
 fn update_selection(game: &mut Game, ui: &mut UI) -> Option<MoveType> {
+    if !game.moves_remaining() {
+        ui.message = error_message(MoveError::NoMovesRemain);
+        return None;
+    }
     if game.board.top(ui.cursor_position).is_some() {
         ui.toggle_selection();
     }
+    if ui.selection.len() == 0 {
+        ui.message.clear();
+        return None;
+    }
     let check = game.check(&ui.selection);
     if check.is_ok() {
-        return Some(check.ok().unwrap().hand)
+        let hand = check.ok().unwrap();
+        ui.message = check_message(hand, game);
+        return Some(hand)
     } else {
         ui.message = error_message(check.err().unwrap());
         return None;
     }
 }
 
+fn success_message() -> String {
+    return "You WON!".to_string();
+}
+
 fn error_message(code: MoveError) -> String {
     return match code {
-        MoveError::InvalidMove => "This selection is not a sage hand",
+        MoveError::InvalidMove => "This selection is not a hand",
+        MoveError::InvalidHand => "This selection does not match the hand",
         MoveError::NeedMultipleRows => "A hand must be played from multiple rows",
         MoveError::NoMovesRemain => "Game Over - No moves left",
+        MoveError::NoDiscardsRemain => "No discards remain",
+        MoveError::TwoPairIsInvalid => "Two pair is not a hand",
+    }.to_string()
+}
+
+fn check_message(code: MoveType, game: &Game) -> String {
+    if code == MoveType::Trash {
+        return format!("Press return to discard this card. ({}/{} remaining)",
+        game.discards_allowed, game.discards_allowed_max);
+    }
+    return format!("Press return to play '{}'", hand_message(code))
+}
+
+fn play_message(code: MoveType) -> String {
+    return format!("Played '{}'", hand_message(code))
+}
+
+fn hand_message(code: MoveType) -> String {
+    return match code {
+        MoveType::StraightFlush => "Straight Flush",
+        MoveType::FourOfAKind => "Four of a Kind",
+        MoveType::Flush => "Flush",
+        MoveType::FullHouse => "Full House",
+        MoveType::FiveCardStraight => "Five-card Straight",
+        MoveType::ThreeOfAKind => "Three of a Kind",
+        MoveType::ThreeCardStraight => "Three-card Straight",
+        MoveType::Pair => "Pair",
+        MoveType::Trash => "Discard",
     }.to_string()
 }
