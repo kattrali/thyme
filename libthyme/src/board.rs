@@ -1,20 +1,20 @@
 extern crate cards;
 
-#[derive(PartialEq, Clone, Copy)]
+#[derive(PartialEq, Clone, Copy, Debug)]
 pub enum VPosition {
     Top,
     Middle,
     Bottom,
 }
 
-#[derive(PartialEq, Clone, Copy)]
+#[derive(PartialEq, Clone, Copy, Debug)]
 pub enum HPosition {
     Left,
     Center,
     Right,
 }
 
-#[derive(PartialEq, Clone, Copy)]
+#[derive(PartialEq, Clone, Copy, Debug)]
 pub struct Position {
     /// horizontal position on the board
     pub x: HPosition,
