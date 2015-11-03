@@ -50,15 +50,6 @@ pub enum MoveType {
     Trash,
 }
 
-pub struct Score {
-    /// The increase in score attained by playing this hand
-    pub value: i32,
-    /// A score bonus from playing this hand, such as from clearing a stack
-    pub bonus: i32,
-    /// Score multiplier from playing a lucky hand
-    pub multiplier: i32,
-}
-
 impl Game {
 
     pub fn new() -> Game {
