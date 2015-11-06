@@ -96,11 +96,12 @@ fn validate_screen_size() -> bool {
 }
 
 /// Print the game title and status info
-fn write_title<T: Scorer>(game: &Game<T>) {
+fn write_title<T: Scorer>(game: &mut Game<T>) {
     printw_margin(0, 0);
     ncurses::attron(ncurses::A_BOLD());
     ncurses::printw("Thyme");
     ncurses::attroff(ncurses::A_BOLD());
+    ncurses::printw(&format!(" - Score: {}", game.score()));
     printw_margin(0, 1);
     let (_, suit) = layout_suit(game.board.lucky_card);
     let info = ncurses::COLOR_PAIR(GAME_INFO_COLOR);

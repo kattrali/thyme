@@ -68,6 +68,11 @@ impl<T: Sized> Game<T> where T: Scorer {
         }
     }
 
+    pub fn score(&mut self) -> i32 {
+        let completion = self.moves_remaining();
+        self.scorer.score(completion)
+    }
+
     /// True if any more moves can be played
     pub fn moves_remaining(&mut self) -> bool {
         return self.board.hands_remaining().iter().find(|h| self.check(&h).is_ok()).is_some()

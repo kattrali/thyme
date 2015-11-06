@@ -36,11 +36,8 @@ pub trait Scorer {
     /// Bonus awarded for clearing a position
     fn bonus(&self, position: Position) -> i32;
 
-    /// The in-game total score
-    fn running_total(&self) -> i32;
-
-    /// The final score including any completion bonuses or multipliers, etc
-    fn final_total(&self, completion: bool) -> i32;
+    /// The score including any completion bonuses or multipliers, etc
+    fn score(&self, completion: bool) -> i32;
 
     /// Format a value as a score
     fn format_as_score(&self, value: i32) -> String;
@@ -77,11 +74,7 @@ impl Scorer for StandardScorer {
     fn add_play(&mut self, play: Play) {
     }
 
-    fn running_total(&self) -> i32 {
-        return self.total
-    }
-
-    fn final_total(&self, completion: bool) -> i32 {
+    fn score(&self, completion: bool) -> i32 {
         return self.total
     }
 
