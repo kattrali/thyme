@@ -12,6 +12,7 @@ pub struct Score {
     pub multiplier: i32,
 }
 
+#[derive(Clone)]
 pub struct Play {
     /// Cards played
     pub cards: Vec<cards::card::Card>,
@@ -60,10 +61,11 @@ impl Scorer for StandardScorer {
     }
 
     fn check_play(&self, play: Play) -> Score {
+        let lucky_card = play.cards.iter().find(|c| c.suit == self.lucky_suit);
         Score {
-            value: 0,
+            value: self.move_value(play.hand),
             bonus: play.cleared_positions.iter().fold(0, |acc, p| acc + self.bonus(*p)),
-            multiplier: 0,
+            multiplier: if lucky_card.is_some() { 2 } else { 1 },
         }
     }
 
@@ -76,6 +78,8 @@ impl Scorer for StandardScorer {
     }
 
     fn add_play(&mut self, play: Play) {
+        let score = self.check_play(play);
+        self.total += (score.value * score.multiplier) + score.bonus;
     }
 
     fn score(&self, completion: bool) -> i32 {
@@ -87,3 +91,19 @@ impl Scorer for StandardScorer {
     }
 }
 
+impl StandardScorer {
+
+    fn move_value(&self, hand: MoveType) -> i32 {
+        return match hand {
+            MoveType::StraightFlush => 150,
+            MoveType::FourOfAKind => 100,
+            MoveType::Flush => 90,
+            MoveType::FullHouse => 70,
+            MoveType::FiveCardStraight => 50,
+            MoveType::ThreeOfAKind => 30,
+            MoveType::ThreeCardStraight => 20,
+            MoveType::Pair => 10,
+            MoveType::Trash => 0,
+        }
+    }
+}

@@ -39,6 +39,7 @@ fn play_hand<T: Scorer>(hand: Option<MoveType>, game: &mut Game<T>, ui: &mut UI)
     if hand.is_some() {
         let result = game.play(hand.unwrap(), &ui.selection);
         if result.is_ok() {
+            game.scorer.add_play(result.ok().unwrap());
             ui.selection.clear();
             if game.moves_remaining() {
                 ui.message = play_message(hand.unwrap())

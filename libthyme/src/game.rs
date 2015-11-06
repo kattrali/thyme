@@ -2,7 +2,7 @@ extern crate cards;
 
 use board::{Board,Position};
 use card::*;
-use score::Scorer;
+use score::{Scorer,Play};
 
 pub struct Game<T: Scorer> {
     pub board: Board,
@@ -81,21 +81,26 @@ impl<T: Sized> Game<T> where T: Scorer {
 
     /// Play the cards at the top of a set of stacks, updating score and
     /// discards_allowed if applicable
-    pub fn play(&mut self, hand: MoveType, positions: &Vec<Position>) -> Result<MoveType, MoveError> {
+    pub fn play(&mut self, hand: MoveType, positions: &Vec<Position>) -> Result<Play, MoveError> {
         let check = self.check(positions);
         if check.is_ok() {
             if check.ok().unwrap() == hand {
-                let _ = self.board.pop(&positions);
+                let cards = self.board.pop(&positions);
                 if hand == MoveType::Trash {
                     self.discards_allowed -= 1;
                 } else if self.discards_allowed < self.discards_allowed_max {
                     self.discards_allowed += 1;
                 }
+                let remaining = self.board.positions_remaining();
+                let cleared = positions.iter().filter(|&p| !remaining.contains(p)).map(|p| *p).collect();
+                return Ok(Play {
+                    cards: cards.unwrap(), hand: hand, cleared_positions: cleared
+                })
             } else {
                 return Err(MoveError::InvalidHand);
             }
         }
-        return check;
+        return Err(check.err().unwrap());
     }
 
     /// Determine what move would result from playing the cards on top of a
