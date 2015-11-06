@@ -2,7 +2,7 @@ extern crate libthyme;
 extern crate ui;
 
 use libthyme::game::*;
-use libthyme::score::{Scorer,StandardScorer};
+use libthyme::score::{Play,Scorer,StandardScorer};
 use ui::{Action,UI};
 use ui::renderer::{initialize_screen,get_action,redraw,cleanup};
 
@@ -68,7 +68,7 @@ fn update_selection<T: Scorer>(game: &mut Game<T>, ui: &mut UI) -> Option<MoveTy
     let check = game.check(&ui.selection);
     if check.is_ok() {
         let hand = check.ok().unwrap();
-        ui.message = check_message(hand, game);
+        ui.message = check_message(hand, ui, game);
         return Some(hand)
     } else {
         ui.message = error_message(check.err().unwrap());
@@ -91,11 +91,19 @@ fn error_message(code: MoveError) -> String {
     }.to_string()
 }
 
-fn check_message<T: Scorer>(code: MoveType, game: &Game<T>) -> String {
-    if code == MoveType::Trash {
+fn check_message<T: Scorer>(hand: MoveType, ui: &UI, game: &mut Game<T>) -> String {
+    if hand == MoveType::Trash {
         return format!("Press return to discard this card.");
     }
-    return format!("Press return to play '{}'", hand_message(code))
+    let score = game.scorer.check_play(Play {
+        cards: game.board.peek(&ui.selection).unwrap(),
+        cleared_positions: vec![],
+        hand: hand
+    });
+    return format!("Press return to play '{}' (+{} x{})",
+                   hand_message(hand),
+                   score.value,
+                   score.multiplier)
 }
 
 fn play_message(code: MoveType) -> String {

@@ -197,12 +197,12 @@ fn draw_empty<T: Scorer>(game: &Game<T>, position: Position) {
         ncurses::attron(color);
         ncurses::mvprintw(y + i, x , "│");
         if i == bonus_height {
-            let bonus = format!("{}", game.scorer.bonus(position));
+            let bonus = format!("+{}", game.scorer.bonus(position));
             let available_width = cmp::max(0, CARD_WIDTH - 2 - bonus.len() as i32);
             let lede = available_width/2;
             printw_repeat(" ", lede, color);
             ncurses::printw(&bonus);
-            printw_repeat(" ", lede, color);
+            printw_repeat(" ", available_width - lede, color);
         } else {
             printw_repeat(" ", CARD_WIDTH - 2, color);
         }
