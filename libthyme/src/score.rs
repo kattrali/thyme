@@ -12,6 +12,15 @@ pub struct Score {
     pub multiplier: i32,
 }
 
+pub struct Play {
+    /// Cards played
+    pub cards: Vec<cards::card::Card>,
+    /// All positions/stacks cleared by this play
+    pub cleared_positions: Vec<Position>,
+    /// Type of play
+    pub hand: MoveType,
+}
+
 pub trait Scorer {
 
     /// Creates a new scorer. Scores may take the lucky card into account, so
@@ -19,18 +28,26 @@ pub trait Scorer {
     fn new(lucky_card: cards::card::Card) -> Self;
 
     /// Compute the score of a potential play
-    fn check_play(&self, hand: MoveType, emptied_positions: Vec<Position>) -> Score;
+    fn check_play(&self, play: Play) -> Score;
 
     /// Update the score with information about the last play
-    fn add_play(&mut self, hand: MoveType, emptied_positions: Vec<Position>);
+    fn add_play(&mut self, play: Play);
+
+    /// Bonus awarded for clearing a position
+    fn bonus(&self, position: Position) -> i32;
 
     /// The in-game total score
-    fn running_total(&self) -> String;
+    fn running_total(&self) -> i32;
 
     /// The final score including any completion bonuses or multipliers, etc
-    fn final_total(&self, completion: bool) -> String;
+    fn final_total(&self, completion: bool) -> i32;
+
+    /// Format a value as a score
+    fn format_as_score(&self, value: i32) -> String;
 }
 
+/// Standard (no fifteens) scoring hands, double bonus awarded for cards
+/// with the lucky card's suit
 pub struct StandardScorer {
     lucky_suit: cards::card::Suit,
     total: i32,
@@ -45,7 +62,7 @@ impl Scorer for StandardScorer {
         }
     }
 
-    fn check_play(&self, hand: MoveType, emptied_positions: Vec<Position>) -> Score {
+    fn check_play(&self, play: Play) -> Score {
         Score {
             value: 0,
             bonus: 0,
@@ -53,15 +70,23 @@ impl Scorer for StandardScorer {
         }
     }
 
-    fn add_play(&mut self, hand: MoveType, emptied_positions: Vec<Position>) {
+    fn bonus(&self, position: Position) -> i32 {
+        return 0
     }
 
-    fn running_total(&self) -> String {
-        return format!("{}", self.total)
+    fn add_play(&mut self, play: Play) {
     }
 
-    fn final_total(&self, completion: bool) -> String {
-        return format!("{}", self.total)
+    fn running_total(&self) -> i32 {
+        return self.total
+    }
+
+    fn final_total(&self, completion: bool) -> i32 {
+        return self.total
+    }
+
+    fn format_as_score(&self, value: i32) -> String {
+        return format!("{}", value)
     }
 }
 

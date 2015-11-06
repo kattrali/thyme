@@ -5,6 +5,7 @@ extern crate ncurses;
 use super::{Action,UI};
 use libthyme::board::{Position,HPosition,VPosition};
 use libthyme::game::Game;
+use libthyme::score::Scorer;
 
 const CARD_WIDTH: i32 = 7;
 const CARD_HEIGHT: i32 = 5;
@@ -38,7 +39,7 @@ pub fn initialize_screen() {
 }
 
 /// Redraw a UI in the current screen
-pub fn redraw(ui: &UI, game: &mut Game, refresh: bool) {
+pub fn redraw<T: Scorer>(ui: &UI, game: &mut Game<T>, refresh: bool) {
     if refresh {
         ncurses::clear();
         ncurses::bkgd(ncurses::COLOR_PAIR(CARD_COLOR_EMPTY));
@@ -95,7 +96,7 @@ fn validate_screen_size() -> bool {
 }
 
 /// Print the game title and status info
-fn write_title(game: &Game) {
+fn write_title<T: Scorer>(game: &Game<T>) {
     printw_margin(0, 0);
     ncurses::attron(ncurses::A_BOLD());
     ncurses::printw("Thyme");
@@ -117,7 +118,7 @@ fn write_message(message: &str) {
     ncurses::clrtoeol();
 }
 
-fn write_cursor_message(ui: &UI, game: &Game) {
+fn write_cursor_message<T: Scorer>(ui: &UI, game: &Game<T>) {
     let stacked_cards = game.board.count_cards(ui.cursor_position);
     let all_cards = game.board.count_all_cards();
     let message = format!("*{}/{} cards in the stack", stacked_cards, all_cards);
@@ -134,7 +135,7 @@ fn printw_margin(x: i32, y: i32) {
     printw_repeat(" ", BOARD_MARGIN, ncurses::COLOR_PAIR(CARD_COLOR_EMPTY));
 }
 
-fn draw_cards(ui: &UI, game: &mut Game) {
+fn draw_cards<T: Scorer>(ui: &UI, game: &mut Game<T>) {
     for position in game.board.positions() {
         let card = game.board.top(position);
         if card.is_some() {

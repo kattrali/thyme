@@ -3,6 +3,7 @@ extern crate libthyme;
 
 use libthyme::game::*;
 use libthyme::board::*;
+use libthyme::score::*;
 use cards::card::{Card, Suit, Value};
 
 #[test]
@@ -133,7 +134,7 @@ fn check_moves(cards: Vec<Card>, discards: i32) -> bool {
         Position { x: HPosition::Left, y: VPosition::Middle },
         Position { x: HPosition::Center, y: VPosition::Top }];
     positions.truncate(cards.len());
-    return setup_game(cards, &positions, discards).moves_remaining()
+    return setup_game::<StandardScorer>(cards, &positions, discards).moves_remaining()
 }
 
 fn check_game(cards: Vec<Card>, discards: i32) -> Result<MoveType, MoveError> {
@@ -144,10 +145,10 @@ fn check_game(cards: Vec<Card>, discards: i32) -> Result<MoveType, MoveError> {
         Position { x: HPosition::Left, y: VPosition::Middle },
         Position { x: HPosition::Center, y: VPosition::Top }];
     positions.truncate(cards.len());
-    return setup_game(cards, &positions, discards).check(&positions);
+    return setup_game::<StandardScorer>(cards, &positions, discards).check(&positions);
 }
 
-fn setup_game(cards: Vec<Card>, positions: &Vec<Position>, discards: i32) -> Game {
+fn setup_game<T: Scorer>(cards: Vec<Card>, positions: &Vec<Position>, discards: i32) -> Game<T> {
     let mut stacks = Vec::new();
     for index in 0..cards.len() {
         stacks.push(Stack { cards: vec![cards[index]], position: positions[index] });
@@ -164,12 +165,12 @@ fn setup_game(cards: Vec<Card>, positions: &Vec<Position>, discards: i32) -> Gam
     stacks.push(Stack {
         cards: vec![Card { value: Value::Seven, suit: Suit::Spades }],
         position: Position { x: HPosition::Right, y: VPosition::Middle } });
-    let board = Board {
-        stacks: stacks, lucky_card: Card { value: Value::King, suit: Suit::Hearts }};
+    let lucky_card = Card { value: Value::King, suit: Suit::Hearts };
+    let board = Board { stacks: stacks, lucky_card: lucky_card };
     return Game {
         board: board,
         discards_allowed: discards,
         discards_allowed_max: discards,
-        score: 0 };
+        scorer: Scorer::new(lucky_card) };
 }
 

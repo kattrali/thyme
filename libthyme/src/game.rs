@@ -2,14 +2,16 @@ extern crate cards;
 
 use board::{Board,Position};
 use card::*;
+use score::Scorer;
 
-pub struct Game {
+pub struct Game<T: Scorer> {
     pub board: Board,
     /// Number of times discarding a single card is allowed
     pub discards_allowed: i32,
     /// Maximum number of times a single card can be discarded in sequence
     pub discards_allowed_max: i32,
-    pub score: i32,
+    /// Score calculator
+    pub scorer: T,
 }
 
 #[derive(PartialEq, Clone, Copy, Debug)]
@@ -50,14 +52,19 @@ pub enum MoveType {
     Trash,
 }
 
-impl Game {
+impl<T: Sized> Game<T> where T: Scorer {
 
-    pub fn new() -> Game {
+    pub fn new() -> Game<T> {
+        let board = Board::new();
+        let lucky_card = cards::card::Card {
+            value: board.lucky_card.value,
+            suit: board.lucky_card.suit
+        };
         Game {
-            board: Board::new(),
+            board: board,
             discards_allowed: 2,
             discards_allowed_max: 2,
-            score: 0
+            scorer: Scorer::new(lucky_card),
         }
     }
 

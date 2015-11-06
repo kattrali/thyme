@@ -2,6 +2,7 @@ extern crate libthyme;
 extern crate ui;
 
 use libthyme::game::*;
+use libthyme::score::{Scorer,StandardScorer};
 use ui::{Action,UI};
 use ui::renderer::{initialize_screen,get_action,redraw,cleanup};
 
@@ -9,7 +10,7 @@ use ui::renderer::{initialize_screen,get_action,redraw,cleanup};
 /// input by the user.
 pub fn main() {
     let mut ui = &mut UI::new();
-    let mut game = &mut Game::new();
+    let mut game = &mut Game::<StandardScorer>::new();
     let mut hand = None;
     initialize_screen();
     redraw(ui, game, true);
@@ -34,7 +35,7 @@ pub fn main() {
     cleanup();
 }
 
-fn play_hand(hand: Option<MoveType>, game: &mut Game, ui: &mut UI) {
+fn play_hand<T: Scorer>(hand: Option<MoveType>, game: &mut Game<T>, ui: &mut UI) {
     if hand.is_some() {
         let result = game.play(hand.unwrap(), &ui.selection);
         if result.is_ok() {
@@ -52,7 +53,7 @@ fn play_hand(hand: Option<MoveType>, game: &mut Game, ui: &mut UI) {
     }
 }
 
-fn update_selection(game: &mut Game, ui: &mut UI) -> Option<MoveType> {
+fn update_selection<T: Scorer>(game: &mut Game<T>, ui: &mut UI) -> Option<MoveType> {
     if !game.moves_remaining() {
         ui.message = error_message(MoveError::NoMovesRemain);
         return None;
@@ -90,7 +91,7 @@ fn error_message(code: MoveError) -> String {
     }.to_string()
 }
 
-fn check_message(code: MoveType, game: &Game) -> String {
+fn check_message<T: Scorer>(code: MoveType, game: &Game<T>) -> String {
     if code == MoveType::Trash {
         return format!("Press return to discard this card. ({}/{} remaining)",
         game.discards_allowed, game.discards_allowed_max);
