@@ -93,8 +93,7 @@ fn error_message(code: MoveError) -> String {
 
 fn check_message<T: Scorer>(code: MoveType, game: &Game<T>) -> String {
     if code == MoveType::Trash {
-        return format!("Press return to discard this card. ({}/{} remaining)",
-        game.discards_allowed, game.discards_allowed_max);
+        return format!("Press return to discard this card.");
     }
     return format!("Press return to play '{}'", hand_message(code))
 }
