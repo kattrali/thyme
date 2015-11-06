@@ -62,13 +62,17 @@ impl Scorer for StandardScorer {
     fn check_play(&self, play: Play) -> Score {
         Score {
             value: 0,
-            bonus: 0,
+            bonus: play.cleared_positions.iter().fold(0, |acc, p| acc + self.bonus(*p)),
             multiplier: 0,
         }
     }
 
     fn bonus(&self, position: Position) -> i32 {
-        return 0
+        return match position.y {
+            VPosition::Top => 150,
+            VPosition::Middle => 100,
+            VPosition::Bottom => 50,
+        }
     }
 
     fn add_play(&mut self, play: Play) {
