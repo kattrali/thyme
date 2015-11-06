@@ -6,6 +6,7 @@ use super::{Action,UI};
 use libthyme::board::{Position,HPosition,VPosition};
 use libthyme::game::Game;
 use libthyme::score::Scorer;
+use std::cmp;
 
 const CARD_WIDTH: i32 = 7;
 const CARD_HEIGHT: i32 = 5;
@@ -142,7 +143,7 @@ fn draw_cards<T: Scorer>(ui: &UI, game: &mut Game<T>) {
         if card.is_some() {
             draw_card(position, card.unwrap());
         } else {
-            draw_empty(position);
+            draw_empty(game, position);
         }
         let (x, y) = card_location(position);
         toggle_highlight_card(x, y, ui.selection.contains(&position));
@@ -182,7 +183,7 @@ fn draw_card(position: Position, card: cards::card::Card) {
 }
 
 /// Draw empty slot for a card
-fn draw_empty(position: Position) {
+fn draw_empty<T: Scorer>(game: &Game<T>, position: Position) {
     let color = ncurses::COLOR_PAIR(CARD_COLOR_EMPTY);
     let (x, y) = card_location(position);
     ncurses::attron(color);
@@ -190,10 +191,21 @@ fn draw_empty(position: Position) {
     printw_repeat("─", CARD_WIDTH - 2, color);
     ncurses::mvprintw(y, x + CARD_WIDTH - 1, "┐");
     ncurses::attroff(color);
-    for i in 1..CARD_HEIGHT - 1 {
+    let gap_height = CARD_HEIGHT - 1;
+    let bonus_height = gap_height/2;
+    for i in 1..gap_height {
         ncurses::attron(color);
         ncurses::mvprintw(y + i, x , "│");
-        printw_repeat(" ", CARD_WIDTH - 2, color);
+        if i == bonus_height {
+            let bonus = format!("{}", game.scorer.bonus(position));
+            let available_width = cmp::max(0, CARD_WIDTH - 2 - bonus.len() as i32);
+            let lede = available_width/2;
+            printw_repeat(" ", lede, color);
+            ncurses::printw(&bonus);
+            printw_repeat(" ", lede, color);
+        } else {
+            printw_repeat(" ", CARD_WIDTH - 2, color);
+        }
         ncurses::attroff(color);
         ncurses::attron(color);
         ncurses::mvprintw(y + i, x + CARD_WIDTH - 1, "│");
