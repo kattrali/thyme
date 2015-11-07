@@ -2,6 +2,7 @@ extern crate libthyme;
 extern crate ui;
 
 use libthyme::game::*;
+use libthyme::score::{Play,Scorer,StandardScorer};
 use ui::{Action,UI};
 use ui::renderer::{initialize_screen,get_action,redraw,cleanup};
 
@@ -9,7 +10,7 @@ use ui::renderer::{initialize_screen,get_action,redraw,cleanup};
 /// input by the user.
 pub fn main() {
     let mut ui = &mut UI::new();
-    let mut game = &mut Game::new();
+    let mut game = &mut Game::<StandardScorer>::new();
     let mut hand = None;
     initialize_screen();
     redraw(ui, game, true);
@@ -34,10 +35,11 @@ pub fn main() {
     cleanup();
 }
 
-fn play_hand(hand: Option<MoveType>, game: &mut Game, ui: &mut UI) {
+fn play_hand<T: Scorer>(hand: Option<MoveType>, game: &mut Game<T>, ui: &mut UI) {
     if hand.is_some() {
         let result = game.play(hand.unwrap(), &ui.selection);
         if result.is_ok() {
+            game.scorer.add_play(result.ok().unwrap());
             ui.selection.clear();
             if game.moves_remaining() {
                 ui.message = play_message(hand.unwrap())
@@ -52,7 +54,7 @@ fn play_hand(hand: Option<MoveType>, game: &mut Game, ui: &mut UI) {
     }
 }
 
-fn update_selection(game: &mut Game, ui: &mut UI) -> Option<MoveType> {
+fn update_selection<T: Scorer>(game: &mut Game<T>, ui: &mut UI) -> Option<MoveType> {
     if !game.moves_remaining() {
         ui.message = error_message(MoveError::NoMovesRemain);
         return None;
@@ -67,7 +69,7 @@ fn update_selection(game: &mut Game, ui: &mut UI) -> Option<MoveType> {
     let check = game.check(&ui.selection);
     if check.is_ok() {
         let hand = check.ok().unwrap();
-        ui.message = check_message(hand, game);
+        ui.message = check_message(hand, ui, game);
         return Some(hand)
     } else {
         ui.message = error_message(check.err().unwrap());
@@ -90,12 +92,20 @@ fn error_message(code: MoveError) -> String {
     }.to_string()
 }
 
-fn check_message(code: MoveType, game: &Game) -> String {
-    if code == MoveType::Trash {
-        return format!("Press return to discard this card. ({}/{} remaining)",
-        game.discards_allowed, game.discards_allowed_max);
+fn check_message<T: Scorer>(hand: MoveType, ui: &UI, game: &mut Game<T>) -> String {
+    if hand == MoveType::Trash {
+        return format!("Press return to discard this card.");
     }
-    return format!("Press return to play '{}'", hand_message(code))
+    let cleared = ui.selection.iter().filter(|p| game.board.count_cards(**p) == 1).map(|p| *p).collect();
+    let score = game.scorer.check_play(Play {
+        cards: game.board.peek(&ui.selection).unwrap(),
+        cleared_positions: cleared,
+        hand: hand
+    });
+    return format!("Press return to play '{}' (+{} x{})",
+                   hand_message(hand),
+                   score.value,
+                   score.multiplier)
 }
 
 fn play_message(code: MoveType) -> String {

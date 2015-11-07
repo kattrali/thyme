@@ -5,6 +5,8 @@ extern crate ncurses;
 use super::{Action,UI};
 use libthyme::board::{Position,HPosition,VPosition};
 use libthyme::game::Game;
+use libthyme::score::Scorer;
+use std::cmp;
 
 const CARD_WIDTH: i32 = 7;
 const CARD_HEIGHT: i32 = 5;
@@ -38,7 +40,7 @@ pub fn initialize_screen() {
 }
 
 /// Redraw a UI in the current screen
-pub fn redraw(ui: &UI, game: &mut Game, refresh: bool) {
+pub fn redraw<T: Scorer>(ui: &UI, game: &mut Game<T>, refresh: bool) {
     if refresh {
         ncurses::clear();
         ncurses::bkgd(ncurses::COLOR_PAIR(CARD_COLOR_EMPTY));
@@ -95,11 +97,12 @@ fn validate_screen_size() -> bool {
 }
 
 /// Print the game title and status info
-fn write_title(game: &Game) {
+fn write_title<T: Scorer>(game: &mut Game<T>) {
     printw_margin(0, 0);
     ncurses::attron(ncurses::A_BOLD());
     ncurses::printw("Thyme");
     ncurses::attroff(ncurses::A_BOLD());
+    ncurses::printw(&format!(" - Score: {}", game.score()));
     printw_margin(0, 1);
     let (_, suit) = layout_suit(game.board.lucky_card);
     let info = ncurses::COLOR_PAIR(GAME_INFO_COLOR);
@@ -117,7 +120,7 @@ fn write_message(message: &str) {
     ncurses::clrtoeol();
 }
 
-fn write_cursor_message(ui: &UI, game: &Game) {
+fn write_cursor_message<T: Scorer>(ui: &UI, game: &Game<T>) {
     let stacked_cards = game.board.count_cards(ui.cursor_position);
     let all_cards = game.board.count_all_cards();
     let message = format!("*{}/{} cards in the stack", stacked_cards, all_cards);
@@ -134,13 +137,13 @@ fn printw_margin(x: i32, y: i32) {
     printw_repeat(" ", BOARD_MARGIN, ncurses::COLOR_PAIR(CARD_COLOR_EMPTY));
 }
 
-fn draw_cards(ui: &UI, game: &mut Game) {
+fn draw_cards<T: Scorer>(ui: &UI, game: &mut Game<T>) {
     for position in game.board.positions() {
         let card = game.board.top(position);
         if card.is_some() {
             draw_card(position, card.unwrap());
         } else {
-            draw_empty(position);
+            draw_empty(game, position);
         }
         let (x, y) = card_location(position);
         toggle_highlight_card(x, y, ui.selection.contains(&position));
@@ -180,7 +183,7 @@ fn draw_card(position: Position, card: cards::card::Card) {
 }
 
 /// Draw empty slot for a card
-fn draw_empty(position: Position) {
+fn draw_empty<T: Scorer>(game: &Game<T>, position: Position) {
     let color = ncurses::COLOR_PAIR(CARD_COLOR_EMPTY);
     let (x, y) = card_location(position);
     ncurses::attron(color);
@@ -188,10 +191,21 @@ fn draw_empty(position: Position) {
     printw_repeat("─", CARD_WIDTH - 2, color);
     ncurses::mvprintw(y, x + CARD_WIDTH - 1, "┐");
     ncurses::attroff(color);
-    for i in 1..CARD_HEIGHT - 1 {
+    let gap_height = CARD_HEIGHT - 1;
+    let bonus_height = gap_height/2;
+    for i in 1..gap_height {
         ncurses::attron(color);
         ncurses::mvprintw(y + i, x , "│");
-        printw_repeat(" ", CARD_WIDTH - 2, color);
+        if i == bonus_height {
+            let bonus = format!("+{}", game.scorer.bonus(position));
+            let available_width = cmp::max(0, CARD_WIDTH - 2 - bonus.len() as i32);
+            let lede = available_width/2;
+            printw_repeat(" ", lede, color);
+            ncurses::printw(&bonus);
+            printw_repeat(" ", available_width - lede, color);
+        } else {
+            printw_repeat(" ", CARD_WIDTH - 2, color);
+        }
         ncurses::attroff(color);
         ncurses::attron(color);
         ncurses::mvprintw(y + i, x + CARD_WIDTH - 1, "│");
