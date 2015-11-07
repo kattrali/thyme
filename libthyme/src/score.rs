@@ -1,6 +1,6 @@
 extern crate cards;
 
-use board::{Position,HPosition,VPosition};
+use board::{Position,VPosition};
 use game::MoveType;
 
 pub struct Score {
@@ -82,7 +82,7 @@ impl Scorer for StandardScorer {
         self.total += (score.value * score.multiplier) + score.bonus;
     }
 
-    fn score(&self, completion: bool) -> i32 {
+    fn score(&self, _: bool) -> i32 {
         return self.total
     }
 

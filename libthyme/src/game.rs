@@ -68,6 +68,7 @@ impl<T: Sized> Game<T> where T: Scorer {
         }
     }
 
+    /// Current score
     pub fn score(&mut self) -> i32 {
         let completion = self.moves_remaining();
         self.scorer.score(completion)

@@ -96,9 +96,10 @@ fn check_message<T: Scorer>(hand: MoveType, ui: &UI, game: &mut Game<T>) -> Stri
     if hand == MoveType::Trash {
         return format!("Press return to discard this card.");
     }
+    let cleared = ui.selection.iter().filter(|p| game.board.count_cards(**p) == 1).map(|p| *p).collect();
     let score = game.scorer.check_play(Play {
         cards: game.board.peek(&ui.selection).unwrap(),
-        cleared_positions: vec![],
+        cleared_positions: cleared,
         hand: hand
     });
     return format!("Press return to play '{}' (+{} x{})",
