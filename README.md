@@ -6,15 +6,23 @@ A command-line interface implementation of [Sage Solitaire](http://sagesolitaire
 
 # Installation
 
-## Dependencies
+## Homebrew
+
+    brew install kattrali/formulae/thyme --HEAD
+
+## Source
+
+### Dependencies
 
 Thyme is written in [Rust](http://rust-lang.org), and built using version
 1.3.0. It depends on [ncurses](https://www.gnu.org/software/ncurses) 6.0.
 
-## Building
+### Building
 
-Run `make release` (or `cargo build --release`) from the root of the project to
-generate the binary at `target/release/thyme`.
+Run `make install` to install thyme to `/usr/local/bin`, or use `DESTDIR` to specify
+an alternate location:
+
+    DESTDIR=/some/directory make install
 
 # Usage
 

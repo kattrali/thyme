@@ -1,23 +1,39 @@
 SRC_FILES=$(shell git ls-files libthyme ui src) Cargo.toml
+# Target installation directory
+DESTDIR := /usr/local/bin
+# Command to install file
+INSTALLCMD := install -C
+
+DEV_FILE=target/debug/thyme
+PROD_FILE=target/release/thyme
 
 all: build
 
-target/%/thyme: $(SRC_FILES)
+$(DEV_FILE): $(SRC_FILES)
 	@cargo build
+
+$(PROD_FILE): $(SRC_FILES)
+	@cargo build --release
 
 .PHONY:
 
-build: target/debug/thyme
+build: $(DEV_FILE)
 
-release: target/release/thyme
+release: $(PROD_FILE)
+
+install: $(PROD_FILE)
+	@$(INSTALLCMD) $(PROD_FILE) $(DESTDIR)/thyme
+
+uninstall:
+	@rm $(DESTDIR)/thyme
 
 clean:
 	@$(MAKE) -C libthyme clean
 	@$(MAKE) -C ui clean
 	@cargo clean
 
-run: target/debug/thyme
-	./target/debug/thyme
+run: $(DEV_FILE)
+	./$(DEV_FILE)
 
 test:
 	@$(MAKE) -C libthyme test
