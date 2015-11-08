@@ -8,7 +8,7 @@ A command-line interface implementation of [Sage Solitaire](http://sagesolitaire
 
 ## Homebrew
 
-    brew install kattrali/formulae/thyme --HEAD
+    brew install kattrali/formulae/thyme
 
 ## Source
 
