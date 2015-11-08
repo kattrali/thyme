@@ -1,6 +1,6 @@
 [package]
 name = "libthyme"
-version = "1.0.0"
+version = "1.1.1"
 authors = ["Delisa Mason <iskanamagus@gmail.com>"]
 
 [dependencies]

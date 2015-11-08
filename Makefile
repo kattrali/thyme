@@ -1,9 +1,11 @@
-SRC_FILES=$(shell git ls-files libthyme ui src) Cargo.toml
 # Target installation directory
-DESTDIR := /usr/local/bin
+DESTDIR := /usr/local
+# Command to create a directory
+INSTALLDIRCMD := install -d
 # Command to install file
 INSTALLCMD := install -C
 
+SRC_FILES=$(shell git ls-files libthyme ui src) Cargo.toml
 DEV_FILE=target/debug/thyme
 PROD_FILE=target/release/thyme
 
@@ -22,10 +24,11 @@ build: $(DEV_FILE)
 release: $(PROD_FILE)
 
 install: $(PROD_FILE)
-	@$(INSTALLCMD) $(PROD_FILE) $(DESTDIR)/thyme
+	@$(INSTALLDIRCMD) $(DESTDIR)/bin
+	@$(INSTALLCMD) $(PROD_FILE) $(DESTDIR)/bin/thyme
 
 uninstall:
-	@rm $(DESTDIR)/thyme
+	@rm $(DESTDIR)/bin/thyme
 
 clean:
 	@$(MAKE) -C libthyme clean

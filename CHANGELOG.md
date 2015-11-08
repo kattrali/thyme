@@ -1,3 +1,7 @@
+# 1.1.1
+
+* Support WASD for cursor navigation
+
 # 1.1.0
 
 * Implement standard-style scoring for hands
