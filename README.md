@@ -1,4 +1,4 @@
-# Thyme ![build status](https://travis-ci.org/kattrali/thyme.svg?branch=master)
+# Thyme [![status](https://travis-ci.org/kattrali/thyme.svg?branch=master)](https://travis-ci.org/kattrali/thyme)
 
 A command-line interface implementation of [Sage Solitaire](http://sagesolitaire.com).
 
@@ -25,7 +25,7 @@ selected as a discard move. The goal is to clear all cards from the board.
 
 ## Keys
 
-* Up, Down, Left, Right: Move the cursor
+* Arrow keys or WASD: Move the cursor
 * Q: Quit game
 * Space: Toggle card selection
 * Return: Play card selection as a hand

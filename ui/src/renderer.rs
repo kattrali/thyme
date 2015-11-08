@@ -62,7 +62,7 @@ pub fn cleanup() {
 /// Process input from the user
 ///
 /// Known inputs:
-/// - Arrow keys: Move cursor between various positions on the board
+/// - Arrow keys/WASD: Move cursor between various positions on the board
 /// - Q: Quit game
 /// - H: Hint (unimplemented)
 /// - ?: Help (unimplemented)
@@ -70,10 +70,10 @@ pub fn cleanup() {
 /// - Return: Play move, clear selection
 pub fn get_action() -> Action {
     return match ncurses::getch() {
-        ncurses::KEY_LEFT => Action::CursorLeft,
-        ncurses::KEY_RIGHT => Action::CursorRight,
-        ncurses::KEY_UP => Action::CursorUp,
-        ncurses::KEY_DOWN => Action::CursorDown,
+        ncurses::KEY_LEFT | 97 => Action::CursorLeft,
+        ncurses::KEY_RIGHT | 100 => Action::CursorRight,
+        ncurses::KEY_UP | 119 => Action::CursorUp,
+        ncurses::KEY_DOWN | 115 => Action::CursorDown,
         ncurses::KEY_RESIZE => Action::Resize,
         ncurses::KEY_ENTER | 13 | 10 => Action::Play,
         32 =>  Action::ToggleSelection, // Space
