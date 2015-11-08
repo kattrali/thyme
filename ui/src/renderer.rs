@@ -65,7 +65,7 @@ pub fn cleanup() {
 /// - Arrow keys: Move cursor between various positions on the board
 /// - Q: Quit game
 /// - H: Hint (unimplemented)
-/// - ?: Help
+/// - ?: Help (unimplemented)
 /// - Space: Toggle position selection
 /// - Return: Play move, clear selection
 pub fn get_action() -> Action {
@@ -120,6 +120,7 @@ fn write_message(message: &str) {
     ncurses::clrtoeol();
 }
 
+/// Print a message describing the stack above the cursor
 fn write_cursor_message<T: Scorer>(ui: &UI, game: &Game<T>) {
     let stacked_cards = game.board.count_cards(ui.cursor_position);
     let all_cards = game.board.count_all_cards();
@@ -132,11 +133,13 @@ fn write_cursor_message<T: Scorer>(ui: &UI, game: &Game<T>) {
     ncurses::attroff(color);
 }
 
+/// Print spaces for the width of the board margin
 fn printw_margin(x: i32, y: i32) {
     ncurses::mv(y, x);
     printw_repeat(" ", BOARD_MARGIN, ncurses::COLOR_PAIR(CARD_COLOR_EMPTY));
 }
 
+/// Print the card values and empty stacks
 fn draw_cards<T: Scorer>(ui: &UI, game: &mut Game<T>) {
     for position in game.board.positions() {
         let card = game.board.top(position);
@@ -218,6 +221,7 @@ fn draw_empty<T: Scorer>(game: &Game<T>, position: Position) {
     ncurses::attroff(color);
 }
 
+/// Print a string repeatedly to fill a length
 fn printw_repeat(content: &str, len: i32, color: u64) {
     ncurses::attron(color);
     for _ in 0..len {
@@ -226,6 +230,7 @@ fn printw_repeat(content: &str, len: i32, color: u64) {
     ncurses::attroff(color);
 }
 
+/// Print or clear the border around a card
 fn toggle_highlight_card(x: i32, y: i32, on: bool) {
     let color = ncurses::COLOR_PAIR(SELECTED_COLOR);
     ncurses::attron(color);
@@ -246,6 +251,7 @@ fn toggle_highlight_card(x: i32, y: i32, on: bool) {
     ncurses::attroff(color);
 }
 
+/// Printed representation of a card's suit
 fn layout_suit(card: cards::card::Card) -> (u64, String) {
     let black = ncurses::COLOR_PAIR(CARD_COLOR_BLACK);
     let red = ncurses::COLOR_PAIR(CARD_COLOR_RED);
@@ -257,6 +263,7 @@ fn layout_suit(card: cards::card::Card) -> (u64, String) {
     }
 }
 
+/// Printed representation of a card's value
 fn layout_value(card: cards::card::Card) -> String {
     return match card.value {
         cards::card::Value::Ace => "A",

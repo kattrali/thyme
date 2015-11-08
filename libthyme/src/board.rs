@@ -109,6 +109,7 @@ impl Board {
     }
 }
 
+/// Divide deck into stacks
 fn deal_deck() -> (Vec<Stack>, cards::card::Card) {
     let mut deck = cards::deck::Deck::new_shuffled();
     let stacks = vec![
@@ -133,6 +134,7 @@ fn deal_deck() -> (Vec<Stack>, cards::card::Card) {
     return (stacks, deck.draw().ok().unwrap())
 }
 
+/// Find all k-combinations of a set of positions
 fn combination(positions: &Vec<Position>) -> Vec<Vec<Position>> {
     return combine(&mut vec![], positions)
 }

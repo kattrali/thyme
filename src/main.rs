@@ -35,6 +35,9 @@ pub fn main() {
     cleanup();
 }
 
+/// Play the cards in the selected positions if possible, and if so then clear
+/// the selection.
+/// Prints a message reflecting the current game state.
 fn play_hand<T: Scorer>(hand: Option<MoveType>, game: &mut Game<T>, ui: &mut UI) {
     if hand.is_some() {
         let result = game.play(hand.unwrap(), &ui.selection);
@@ -54,6 +57,9 @@ fn play_hand<T: Scorer>(hand: Option<MoveType>, game: &mut Game<T>, ui: &mut UI)
     }
 }
 
+/// Toggle the selection of the cursor-selected card, if cards remain in that
+/// position and the game has not ended.
+/// Prints a message reflecting the current game state.
 fn update_selection<T: Scorer>(game: &mut Game<T>, ui: &mut UI) -> Option<MoveType> {
     if !game.moves_remaining() {
         ui.message = error_message(MoveError::NoMovesRemain);
