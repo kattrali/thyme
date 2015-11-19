@@ -70,15 +70,15 @@ pub fn cleanup() {
 /// - Return: Play move, clear selection
 pub fn get_action() -> Action {
     return match ncurses::getch() {
-        ncurses::KEY_LEFT | 97 => Action::CursorLeft,
-        ncurses::KEY_RIGHT | 100 => Action::CursorRight,
-        ncurses::KEY_UP | 119 => Action::CursorUp,
-        ncurses::KEY_DOWN | 115 => Action::CursorDown,
+        ncurses::KEY_LEFT | 97 | 104 => Action::CursorLeft,
+        ncurses::KEY_RIGHT | 100 | 108 => Action::CursorRight,
+        ncurses::KEY_UP | 119 | 107 => Action::CursorUp,
+        ncurses::KEY_DOWN | 115 | 106 => Action::CursorDown,
         ncurses::KEY_RESIZE => Action::Resize,
         ncurses::KEY_ENTER | 13 | 10 => Action::Play,
         32 =>  Action::ToggleSelection, // Space
         113 => Action::Quit, // Q
-        104 => Action::Hint, // H
+        116 => Action::Hint, // T
         63 =>  Action::Help, // ?
         _ =>   Action::Unknown
     }
