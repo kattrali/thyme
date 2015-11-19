@@ -222,7 +222,7 @@ fn draw_empty<T: Scorer>(game: &Game<T>, position: Position) {
 }
 
 /// Print a string repeatedly to fill a length
-fn printw_repeat(content: &str, len: i32, color: u64) {
+fn printw_repeat(content: &str, len: i32, color: ncurses::chtype) {
     ncurses::attron(color);
     for _ in 0..len {
        ncurses::printw(content);
@@ -252,7 +252,7 @@ fn toggle_highlight_card(x: i32, y: i32, on: bool) {
 }
 
 /// Printed representation of a card's suit
-fn layout_suit(card: cards::card::Card) -> (u64, String) {
+fn layout_suit(card: cards::card::Card) -> (ncurses::chtype, String) {
     let black = ncurses::COLOR_PAIR(CARD_COLOR_BLACK);
     let red = ncurses::COLOR_PAIR(CARD_COLOR_RED);
     return match card.suit {
