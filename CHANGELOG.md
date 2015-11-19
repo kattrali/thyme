@@ -1,3 +1,7 @@
+# 1.1.2
+
+* Fix compilation bug on 32-bit systems
+
 # 1.1.1
 
 * Support WASD for cursor navigation
