@@ -35,8 +35,8 @@ clean:
 	@$(MAKE) -C ui clean
 	@cargo clean
 
-run: $(DEV_FILE)
-	./$(DEV_FILE)
+run:
+	@cargo run
 
 test:
 	@$(MAKE) -C libthyme test
