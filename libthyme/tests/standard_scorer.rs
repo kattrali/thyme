@@ -3,6 +3,7 @@ extern crate libthyme;
 
 use cards::card::{Card, Suit, Value};
 use libthyme::score::*;
+use libthyme::score::standard::StandardScorer;
 use libthyme::board::{Position,HPosition,VPosition};
 use libthyme::game::MoveType;
 

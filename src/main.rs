@@ -2,7 +2,8 @@ extern crate libthyme;
 extern crate ui;
 
 use libthyme::game::*;
-use libthyme::score::{Play,Scorer,StandardScorer};
+use libthyme::score::{Play,Scorer};
+use libthyme::score::standard::StandardScorer;
 use ui::{Action,UI};
 use ui::renderer::{initialize_screen,get_action,redraw,cleanup};
 
@@ -102,7 +103,9 @@ fn check_message<T: Scorer>(hand: MoveType, ui: &UI, game: &mut Game<T>) -> Stri
     if hand == MoveType::Trash {
         return format!("Press return to discard this card.");
     }
-    let cleared = ui.selection.iter().filter(|p| game.board.count_cards(**p) == 1).map(|p| *p).collect();
+    let cleared = ui.selection.iter().filter(|p| {
+        game.board.count_cards(**p) == 1
+    }).map(|p| *p).collect();
     let score = game.scorer.check_play(Play {
         cards: game.board.peek(&ui.selection).unwrap(),
         cleared_positions: cleared,

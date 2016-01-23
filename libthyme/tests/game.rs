@@ -4,6 +4,7 @@ extern crate libthyme;
 use libthyme::game::*;
 use libthyme::board::*;
 use libthyme::score::*;
+use libthyme::score::standard::StandardScorer;
 use cards::card::{Card, Suit, Value};
 
 #[test]
