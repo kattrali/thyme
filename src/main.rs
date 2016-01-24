@@ -1,17 +1,26 @@
 extern crate libthyme;
 extern crate ui;
 
+use std::env;
 use libthyme::game::*;
 use libthyme::score::{Play,Scorer};
-use libthyme::score::standard::StandardScorer;
+use libthyme::score::{StandardScorer,VegasScorer};
 use ui::{Action,UI};
 use ui::renderer::{initialize_screen,get_action,redraw,cleanup};
 
 /// Run loop of the thyme game, which interprets key presses and processes
 /// input by the user.
 pub fn main() {
+    let game_type = &env::args().nth(1).unwrap_or(String::from("standard"));
+    match game_type.as_str() {
+        "vegas" => run_game::<VegasScorer>(),
+        _ => run_game::<StandardScorer>()
+    };
+}
+
+fn run_game<T: Scorer>() {
     let mut ui = &mut UI::new();
-    let mut game = &mut Game::<StandardScorer>::new();
+    let mut game = &mut Game::<T>::new();
     let mut hand = None;
     initialize_screen();
     redraw(ui, game, true);

@@ -1,7 +1,10 @@
 extern crate cards;
 
-pub mod standard;
-pub mod vegas;
+mod standard;
+mod vegas;
+
+pub use self::vegas::VegasScorer;
+pub use self::standard::StandardScorer;
 
 use board::Position;
 use game::MoveType;
@@ -46,4 +49,3 @@ pub trait Scorer {
     /// Format a value as a score
     fn format_as_score(&self, value: i32) -> String;
 }
-

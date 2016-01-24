@@ -99,11 +99,10 @@ fn all_cards(mut board: Board) -> Vec<Card> {
 fn empty_stack(board: &mut Board, x: HPosition, y: VPosition) -> Vec<Card> {
     let mut stack = Vec::<Card>::new();
     loop {
-        let result = board.pop(&vec![Position { x: x, y: y }]);
-        if result.is_none() {
-            break;
+        if let Some(result) = board.pop(&vec![Position { x: x, y: y }]) {
+            stack.push(result[0])
         } else {
-            stack.push(result.unwrap()[0])
+            break;
         }
     }
     return stack;
