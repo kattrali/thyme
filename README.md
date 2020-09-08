@@ -15,7 +15,7 @@ A command-line interface implementation of [Sage Solitaire](http://sagesolitaire
 ### Dependencies
 
 Thyme is written in [Rust](http://rust-lang.org), and built using version
-1.3.0. It depends on [ncurses](https://www.gnu.org/software/ncurses) 6.0.
+1.41.0. It depends on [ncurses](https://www.gnu.org/software/ncurses) 6.0.
 
 ### Building
 
