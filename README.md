@@ -2,7 +2,7 @@
 
 A command-line interface implementation of [Sage Solitaire](http://sagesolitaire.com).
 
-![screenshot](thyme.png)
+<img src="thyme.png" width="532" alt="screenshot"/>
 
 # Installation
 
