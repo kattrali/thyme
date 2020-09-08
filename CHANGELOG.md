@@ -1,3 +1,8 @@
+# 1.1.3 (2020-09-08)
+
+* Fix compilation for changes in `ncurses` package v5.84.0 and newer
+* Address warnings related to use of the `ncurses::printw` function
+
 # 1.1.2
 
 * Fix compilation bug on 32-bit systems
