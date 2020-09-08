@@ -29,7 +29,7 @@ pub fn initialize_screen() {
     ncurses::initscr();
     ncurses::noecho();
     ncurses::start_color();
-    ncurses::keypad(ncurses::stdscr, true);
+    ncurses::keypad(ncurses::stdscr(), true);
     ncurses::curs_set(ncurses::CURSOR_VISIBILITY::CURSOR_INVISIBLE);
     ncurses::init_pair(CARD_COLOR_BLACK, ncurses::COLOR_BLACK, CARD_BG_COLOR);
     ncurses::init_pair(CARD_COLOR_RED, ncurses::COLOR_RED, CARD_BG_COLOR);
@@ -87,7 +87,7 @@ pub fn get_action() -> Action {
 /// Check that the content can fit
 fn validate_screen_size() -> bool {
     let min_height = BOARD_MARGIN*2 + CARD_MARGIN*4 + STATUS_HEIGHT + CARD_HEIGHT*3;
-    if ncurses::LINES < min_height || ncurses::COLS < 50 {
+    if ncurses::LINES() < min_height || ncurses::COLS() < 50 {
         write_message(&format!(
                 "Please resize your terminal to be at least 50x{}",
                 min_height));
@@ -115,7 +115,7 @@ fn write_title<T: Scorer>(game: &mut Game<T>) {
 
 /// Print the message at the bottom of the window
 fn write_message(message: &str) {
-    printw_margin(0, ncurses::LINES - 1);
+    printw_margin(0, ncurses::LINES() - 1);
     ncurses::printw(message);
     ncurses::clrtoeol();
 }
@@ -126,7 +126,7 @@ fn write_cursor_message<T: Scorer>(ui: &UI, game: &Game<T>) {
     let all_cards = game.board.count_all_cards();
     let message = format!("*{}/{} cards in the stack", stacked_cards, all_cards);
     let color = ncurses::COLOR_PAIR(CURSOR_INFO_COLOR);
-    printw_margin(0, ncurses::LINES - 2);
+    printw_margin(0, ncurses::LINES() - 2);
     ncurses::attron(color);
     ncurses::printw(&message);
     ncurses::clrtoeol();
