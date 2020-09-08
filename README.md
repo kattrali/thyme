@@ -1,4 +1,4 @@
-# Thyme [![status](https://travis-ci.org/kattrali/thyme.svg?branch=master)](https://travis-ci.org/kattrali/thyme)
+# Thyme
 
 A command-line interface implementation of [Sage Solitaire](http://sagesolitaire.com).
 
