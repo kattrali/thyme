@@ -1,8 +1,2 @@
-[package]
-name    = "thyme"
-version = "1.1.2"
-authors = ["Delisa Mason <iskanamagus@gmail.com>"]
-
-[dependencies]
-libthyme = { path = "libthyme" }
-ui       = { path = "ui" }
+[workspace]
+members = ["thyme", "libthyme", "ui"]

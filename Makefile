@@ -31,14 +31,10 @@ uninstall:
 	@rm $(DESTDIR)/bin/thyme
 
 clean:
-	@$(MAKE) -C libthyme clean
-	@$(MAKE) -C ui clean
 	@cargo clean
 
 run:
 	@cargo run
 
 test:
-	@$(MAKE) -C libthyme test
-	@$(MAKE) -C ui test
 	@cargo test
