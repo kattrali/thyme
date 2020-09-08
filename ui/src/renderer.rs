@@ -98,16 +98,16 @@ fn validate_screen_size() -> bool {
 
 /// Print the game title and status info
 fn write_title<T: Scorer>(game: &mut Game<T>) {
-    printw_margin(0, 0);
+    addstr_margin(0, 0);
     ncurses::attron(ncurses::A_BOLD());
-    ncurses::printw("Thyme");
+    ncurses::addstr("Thyme");
     ncurses::attroff(ncurses::A_BOLD());
-    ncurses::printw(&format!(" - Score: {}", game.score()));
-    printw_margin(0, 1);
+    ncurses::addstr(&format!(" - Score: {}", game.score()));
+    addstr_margin(0, 1);
     let (_, suit) = layout_suit(game.board.lucky_card);
     let info = ncurses::COLOR_PAIR(GAME_INFO_COLOR);
     ncurses::attron(info);
-    ncurses::printw(&format!("Lucky Suit: {}  Discards Left: {}/{}", suit,
+    ncurses::addstr(&format!("Lucky Suit: {}  Discards Left: {}/{}", suit,
                              game.discards_allowed, game.discards_allowed_max));
     ncurses::clrtoeol();
     ncurses::attroff(info);
@@ -115,8 +115,8 @@ fn write_title<T: Scorer>(game: &mut Game<T>) {
 
 /// Print the message at the bottom of the window
 fn write_message(message: &str) {
-    printw_margin(0, ncurses::LINES() - 1);
-    ncurses::printw(message);
+    addstr_margin(0, ncurses::LINES() - 1);
+    ncurses::addstr(message);
     ncurses::clrtoeol();
 }
 
@@ -126,17 +126,17 @@ fn write_cursor_message<T: Scorer>(ui: &UI, game: &Game<T>) {
     let all_cards = game.board.count_all_cards();
     let message = format!("*{}/{} cards in the stack", stacked_cards, all_cards);
     let color = ncurses::COLOR_PAIR(CURSOR_INFO_COLOR);
-    printw_margin(0, ncurses::LINES() - 2);
+    addstr_margin(0, ncurses::LINES() - 2);
     ncurses::attron(color);
-    ncurses::printw(&message);
+    ncurses::addstr(&message);
     ncurses::clrtoeol();
     ncurses::attroff(color);
 }
 
 /// Print spaces for the width of the board margin
-fn printw_margin(x: i32, y: i32) {
+fn addstr_margin(x: i32, y: i32) {
     ncurses::mv(y, x);
-    printw_repeat(" ", BOARD_MARGIN, ncurses::COLOR_PAIR(CARD_COLOR_EMPTY));
+    addstr_repeat(" ", BOARD_MARGIN, ncurses::COLOR_PAIR(CARD_COLOR_EMPTY));
 }
 
 /// Print the card values and empty stacks
@@ -170,18 +170,18 @@ fn draw_card(position: Position, card: cards::card::Card) {
     ncurses::mvprintw(y, x + value.len() as i32, &suit);
     ncurses::attroff(color);
     let spacing = CARD_WIDTH - value.len() as i32 - 1;
-    printw_repeat(" ", spacing, black);
+    addstr_repeat(" ", spacing, black);
     for i in 1..CARD_HEIGHT - 1 {
         ncurses::mv(y + i, x);
-        printw_repeat(" ", CARD_WIDTH, black);
+        addstr_repeat(" ", CARD_WIDTH, black);
     }
     ncurses::mv(y + CARD_HEIGHT - 1, x);
-    printw_repeat(" ", spacing, black);
+    addstr_repeat(" ", spacing, black);
     ncurses::attron(black);
-    ncurses::printw(&value);
+    ncurses::addstr(&value);
     ncurses::attroff(black);
     ncurses::attron(color);
-    ncurses::printw(&suit);
+    ncurses::addstr(&suit);
     ncurses::attroff(color);
 }
 
@@ -191,7 +191,7 @@ fn draw_empty<T: Scorer>(game: &Game<T>, position: Position) {
     let (x, y) = card_location(position);
     ncurses::attron(color);
     ncurses::mvprintw(y, x, "┌");
-    printw_repeat("─", CARD_WIDTH - 2, color);
+    addstr_repeat("─", CARD_WIDTH - 2, color);
     ncurses::mvprintw(y, x + CARD_WIDTH - 1, "┐");
     ncurses::attroff(color);
     let gap_height = CARD_HEIGHT - 1;
@@ -203,11 +203,11 @@ fn draw_empty<T: Scorer>(game: &Game<T>, position: Position) {
             let bonus = format!("+{}", game.scorer.bonus(position));
             let available_width = cmp::max(0, CARD_WIDTH - 2 - bonus.len() as i32);
             let lede = available_width/2;
-            printw_repeat(" ", lede, color);
-            ncurses::printw(&bonus);
-            printw_repeat(" ", available_width - lede, color);
+            addstr_repeat(" ", lede, color);
+            ncurses::addstr(&bonus);
+            addstr_repeat(" ", available_width - lede, color);
         } else {
-            printw_repeat(" ", CARD_WIDTH - 2, color);
+            addstr_repeat(" ", CARD_WIDTH - 2, color);
         }
         ncurses::attroff(color);
         ncurses::attron(color);
@@ -216,16 +216,16 @@ fn draw_empty<T: Scorer>(game: &Game<T>, position: Position) {
     }
     ncurses::attron(color);
     ncurses::mvprintw(y + CARD_HEIGHT - 1, x, "└");
-    printw_repeat("─", CARD_WIDTH - 2, color);
+    addstr_repeat("─", CARD_WIDTH - 2, color);
     ncurses::mvprintw(y + CARD_HEIGHT - 1, x + CARD_WIDTH - 1, "┘");
     ncurses::attroff(color);
 }
 
 /// Print a string repeatedly to fill a length
-fn printw_repeat(content: &str, len: i32, color: ncurses::chtype) {
+fn addstr_repeat(content: &str, len: i32, color: ncurses::chtype) {
     ncurses::attron(color);
     for _ in 0..len {
-       ncurses::printw(content);
+       ncurses::addstr(content);
     }
     ncurses::attroff(color);
 }
@@ -237,9 +237,9 @@ fn toggle_highlight_card(x: i32, y: i32, on: bool) {
     ncurses::mvprintw(y - 1, x - 1, if on {"┌"} else {" "});
     ncurses::attroff(color);
     ncurses::mv(y - 1, x);
-    printw_repeat(if on {"─"} else {" "}, CARD_WIDTH, color);
+    addstr_repeat(if on {"─"} else {" "}, CARD_WIDTH, color);
     ncurses::mv(y + CARD_HEIGHT, x);
-    printw_repeat(if on {"─"} else {" "}, CARD_WIDTH, color);
+    addstr_repeat(if on {"─"} else {" "}, CARD_WIDTH, color);
     ncurses::attron(color);
     ncurses::mvprintw(y - 1, x + CARD_WIDTH, if on {"┐"} else {" "});
     for i in 0..CARD_HEIGHT {
