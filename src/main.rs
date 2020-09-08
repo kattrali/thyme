@@ -10,7 +10,7 @@ use ui::renderer::{initialize_screen,get_action,redraw,cleanup};
 /// input by the user.
 pub fn main() {
     let mut ui = &mut UI::new();
-    let mut game = &mut Game::<StandardScorer>::new();
+    let game = &mut Game::<StandardScorer>::new();
     let mut hand = None;
     initialize_screen();
     redraw(ui, game, true);
